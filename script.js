@@ -1,4 +1,3 @@
-// 【完全版】script.js
 const SIZE = 8;
 const PLAYER = 1; // 黒
 const CPU = 2;    // 白
@@ -187,4 +186,3 @@ function hasValidMove(color) {
 }
 
 initGame();
-
