@@ -92,7 +92,7 @@ function cpuMove() {
                     nextBoard[r][c] = CPU;
                     flips.forEach(([fr, fc]) => nextBoard[fr][fc] = CPU);
                     // 快適に遊ぶため深さを 6 に設定
-                    let score = alphaBeta(nextBoard, 6, -Infinity, Infinity, false);
+                    let score = alphaBeta(nextBoard, 5, -Infinity, Infinity, false);
                     if (score > bestScore) {
                         bestScore = score;
                         bestMove = {r, c};
@@ -164,8 +164,7 @@ function evaluate(vBoard) {
         }
     }
     // 戦略：自分の打てる場所を増やし、相手を減らす
-    score += (cMoves - pMoves) * 15;
-    return score;
+       return score;
 }
 
 function countPossibleMovesVirtual(vBoard, color) {
@@ -186,3 +185,4 @@ function hasValidMove(color) {
 }
 
 initGame();
+
