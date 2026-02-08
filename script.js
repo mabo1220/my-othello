@@ -154,17 +154,13 @@ function alphaBeta(vBoard, depth, alpha, beta, isMaximizing) {
 
 function evaluate(vBoard) {
     let score = 0;
-    let pMoves = countPossibleMovesVirtual(vBoard, PLAYER);
-    let cMoves = countPossibleMovesVirtual(vBoard, CPU);
-
     for (let r = 0; r < SIZE; r++) {
         for (let c = 0; c < SIZE; c++) {
             if (vBoard[r][c] === CPU) score += weights[r][c];
             else if (vBoard[r][c] === PLAYER) score -= weights[r][c];
         }
     }
-    // 戦略：自分の打てる場所を増やし、相手を減らす
-       return score;
+    return score;
 }
 
 function countPossibleMovesVirtual(vBoard, color) {
@@ -185,4 +181,5 @@ function hasValidMove(color) {
 }
 
 initGame();
+
 
