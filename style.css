@@ -1,0 +1,16 @@
+body { background-color: #2c3e50; color: white; font-family: sans-serif; display: flex; justify-content: center; }
+.container { text-align: center; margin-top: 20px; }
+.board { 
+    display: grid; grid-template-columns: repeat(8, 50px); grid-template-rows: repeat(8, 50px);
+    background-color: #145028; border: 5px solid #2e7d32; margin: 20px auto; 
+}
+.cell { 
+    width: 50px; height: 50px; border: 1px solid #649664; 
+    display: flex; justify-content: center; align-items: center; cursor: pointer;
+}
+.stone { 
+    width: 40px; height: 40px; border-radius: 50%; transition: transform 0.3s, background-color 0.3s;
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+.black { background: radial-gradient(circle at 30% 30%, #444, #111); }
+.white { background: radial-gradient(circle at 30% 30%, #fff, #ccc); }
