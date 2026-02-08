@@ -1,3 +1,4 @@
+// 【完全版】script.js
 const SIZE = 8;
 const PLAYER = 1; // 黒
 const CPU = 2;    // 白
@@ -15,17 +16,16 @@ const weights = [
     [120, -20, 20,  5,  5, 20, -20, 120]
 ];
 
-// ゲーム初期化
-function startGame() {
+function initGame() {
     board = Array.from({ length: SIZE }, () => Array(SIZE).fill(EMPTY));
     board[3][3] = CPU; board[4][4] = CPU;
     board[3][4] = PLAYER; board[4][3] = PLAYER;
     drawBoard();
 }
 
-// 描画更新
 function drawBoard() {
     const boardElement = document.getElementById('board');
+    if(!boardElement) return;
     boardElement.innerHTML = '';
     let pCount = 0, cCount = 0;
 
@@ -34,7 +34,6 @@ function drawBoard() {
             const cell = document.createElement('div');
             cell.className = 'cell';
             cell.onclick = () => playerMove(r, c);
-            
             if (board[r][c] !== EMPTY) {
                 const stone = document.createElement('div');
                 stone.className = `stone ${board[r][c] === PLAYER ? 'black' : 'white'}`;
@@ -44,16 +43,14 @@ function drawBoard() {
             boardElement.appendChild(cell);
         }
     }
-    document.getElementById('player-score').innerText = pCount;
-    document.getElementById('cpu-score').innerText = cCount;
+    document.getElementById('p-score').innerText = pCount;
+    document.getElementById('c-score').innerText = cCount;
 }
 
-// 8方向探索ロジック
 function getFlipList(r, c, color, targetBoard) {
     const opp = color === PLAYER ? CPU : PLAYER;
     let flips = [];
     const directions = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
-
     for (let [dr, dc] of directions) {
         let temp = [];
         let tr = r + dr, tc = c + dc;
@@ -68,7 +65,6 @@ function getFlipList(r, c, color, targetBoard) {
     return flips;
 }
 
-// プレイヤーの手番
 async function playerMove(r, c) {
     if (board[r][c] !== EMPTY) return;
     const flips = getFlipList(r, c, PLAYER, board);
@@ -81,15 +77,13 @@ async function playerMove(r, c) {
     if (hasValidMove(CPU)) {
         setTimeout(cpuMove, 500);
     } else if (!hasValidMove(PLAYER)) {
-        alert("終了！");
+        alert("ゲーム終了！");
     }
 }
 
-// AI思考（Alpha-Beta法 Lv.6）
 function cpuMove() {
     let bestScore = -Infinity;
     let bestMove = null;
-
     for (let r = 0; r < SIZE; r++) {
         for (let c = 0; c < SIZE; c++) {
             if (board[r][c] === EMPTY) {
@@ -98,8 +92,7 @@ function cpuMove() {
                     let nextBoard = board.map(row => [...row]);
                     nextBoard[r][c] = CPU;
                     flips.forEach(([fr, fc]) => nextBoard[fr][fc] = CPU);
-
-                    let score = alphaBeta(nextBoard, 5, -Infinity, Infinity, false);
+                    let score = alphaBeta(nextBoard, 8, -Infinity, Infinity, false);
                     if (score > bestScore) {
                         bestScore = score;
                         bestMove = {r, c};
@@ -108,7 +101,6 @@ function cpuMove() {
             }
         }
     }
-
     if (bestMove) {
         const flips = getFlipList(bestMove.r, bestMove.c, CPU, board);
         board[bestMove.r][bestMove.c] = CPU;
@@ -120,19 +112,81 @@ function cpuMove() {
 
 function alphaBeta(vBoard, depth, alpha, beta, isMaximizing) {
     if (depth === 0) return evaluate(vBoard);
-    // ... ここにVBAと同じAlphaBetaロジックをループで実装 ...
-    return isMaximizing ? alpha : beta; 
+    const color = isMaximizing ? CPU : PLAYER;
+    let possibleMoves = [];
+    for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+            if (vBoard[r][c] === EMPTY && getFlipList(r, c, color, vBoard).length > 0) {
+                possibleMoves.push({r, c});
+            }
+        }
+    }
+    if (possibleMoves.length === 0) return evaluate(vBoard);
+
+    if (isMaximizing) {
+        let val = -Infinity;
+        for (let move of possibleMoves) {
+            let nextBoard = vBoard.map(row => [...row]);
+            const flips = getFlipList(move.r, move.c, CPU, nextBoard);
+            nextBoard[move.r][move.c] = CPU;
+            flips.forEach(([fr, fc]) => nextBoard[fr][fc] = CPU);
+            val = Math.max(val, alphaBeta(nextBoard, depth - 1, alpha, beta, false));
+            alpha = Math.max(alpha, val);
+            if (alpha >= beta) break;
+        }
+        return val;
+    } else {
+        let val = Infinity;
+        for (let move of possibleMoves) {
+            let nextBoard = vBoard.map(row => [...row]);
+            const flips = getFlipList(move.r, move.c, PLAYER, nextBoard);
+            nextBoard[move.r][move.c] = PLAYER;
+            flips.forEach(([fr, fc]) => nextBoard[fr][fc] = PLAYER);
+            val = Math.min(val, alphaBeta(nextBoard, depth - 1, alpha, beta, true));
+            beta = Math.min(beta, val);
+            if (alpha >= beta) break;
+        }
+        return val;
+    }
 }
 
 function evaluate(vBoard) {
     let score = 0;
-    for (let r = 0; r < SIZE; r++)
-        for (let c = 0; c < SIZE; c++)
-            if (vBoard[r][c] === CPU) score += weights[r][c];
-            else if (vBoard[r][c] === PLAYER) score -= weights[r][c];
+    let pMoves = 0;
+    let cMoves = 0;
+
+    for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+            if (vBoard[r][c] === CPU) {
+                score += weights[r][c];
+                // CPU（白）が次に打てる場所を数える（簡易的な開放度評価）
+            } else if (vBoard[r][c] === PLAYER) {
+                score -= weights[r][c];
+            }
+        }
+    }
+    
+    // 【戦略追加】着手可能数（モビリティ）の評価
+    // 相手の打てる場所を減らし、自分の場所を増やす動きを優先させる
+    cMoves = countPossibleMovesVirtual(vBoard, CPU);
+    pMoves = countPossibleMovesVirtual(vBoard, PLAYER);
+    score += (cMoves - pMoves) * 10; 
+
     return score;
 }
 
+// 仮想盤面での着手可能数カウント用ヘルパー
+function countPossibleMovesVirtual(vBoard, color) {
+    let count = 0;
+    for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+            if (vBoard[r][c] === EMPTY && getFlipList(r, c, color, vBoard).length > 0) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
 function hasValidMove(color) {
     for (let r = 0; r < SIZE; r++)
         for (let c = 0; c < SIZE; c++)
@@ -140,4 +194,4 @@ function hasValidMove(color) {
     return false;
 }
 
-startGame();
+initGame();
