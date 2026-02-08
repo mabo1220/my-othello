@@ -92,7 +92,8 @@ function cpuMove() {
                     let nextBoard = board.map(row => [...row]);
                     nextBoard[r][c] = CPU;
                     flips.forEach(([fr, fc]) => nextBoard[fr][fc] = CPU);
-                    let score = alphaBeta(nextBoard, 8, -Infinity, Infinity, false);
+                    // 快適に遊ぶため深さを 6 に設定
+                    let score = alphaBeta(nextBoard, 6, -Infinity, Infinity, false);
                     if (score > bestScore) {
                         bestScore = score;
                         bestMove = {r, c};
@@ -107,6 +108,8 @@ function cpuMove() {
         flips.forEach(([fr, fc]) => board[fr][fc] = CPU);
         drawBoard();
         if (!hasValidMove(PLAYER) && hasValidMove(CPU)) setTimeout(cpuMove, 500);
+    } else {
+        alert("PCはパスします");
     }
 }
 
@@ -152,41 +155,30 @@ function alphaBeta(vBoard, depth, alpha, beta, isMaximizing) {
 
 function evaluate(vBoard) {
     let score = 0;
-    let pMoves = 0;
-    let cMoves = 0;
+    let pMoves = countPossibleMovesVirtual(vBoard, PLAYER);
+    let cMoves = countPossibleMovesVirtual(vBoard, CPU);
 
     for (let r = 0; r < SIZE; r++) {
         for (let c = 0; c < SIZE; c++) {
-            if (vBoard[r][c] === CPU) {
-                score += weights[r][c];
-                // CPU（白）が次に打てる場所を数える（簡易的な開放度評価）
-            } else if (vBoard[r][c] === PLAYER) {
-                score -= weights[r][c];
-            }
+            if (vBoard[r][c] === CPU) score += weights[r][c];
+            else if (vBoard[r][c] === PLAYER) score -= weights[r][c];
         }
     }
-    
-    // 【戦略追加】着手可能数（モビリティ）の評価
-    // 相手の打てる場所を減らし、自分の場所を増やす動きを優先させる
-    cMoves = countPossibleMovesVirtual(vBoard, CPU);
-    pMoves = countPossibleMovesVirtual(vBoard, PLAYER);
-    score += (cMoves - pMoves) * 10; 
-
+    // 戦略：自分の打てる場所を増やし、相手を減らす
+    score += (cMoves - pMoves) * 15;
     return score;
 }
 
-// 仮想盤面での着手可能数カウント用ヘルパー
 function countPossibleMovesVirtual(vBoard, color) {
     let count = 0;
     for (let r = 0; r < SIZE; r++) {
         for (let c = 0; c < SIZE; c++) {
-            if (vBoard[r][c] === EMPTY && getFlipList(r, c, color, vBoard).length > 0) {
-                count++;
-            }
+            if (vBoard[r][c] === EMPTY && getFlipList(r, c, color, vBoard).length > 0) count++;
         }
     }
     return count;
 }
+
 function hasValidMove(color) {
     for (let r = 0; r < SIZE; r++)
         for (let c = 0; c < SIZE; c++)
@@ -195,3 +187,4 @@ function hasValidMove(color) {
 }
 
 initGame();
+
