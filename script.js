@@ -91,8 +91,8 @@ function cpuMove() {
                     let nextBoard = board.map(row => [...row]);
                     nextBoard[r][c] = CPU;
                     flips.forEach(([fr, fc]) => nextBoard[fr][fc] = CPU);
-                    // 快適に遊ぶため深さを 6 に設定
-                    let score = alphaBeta(nextBoard, 5, -Infinity, Infinity, false);
+                    // 快適に遊ぶため深さを 4 に設定
+                    let score = alphaBeta(nextBoard, 4, -Infinity, Infinity, false);
                     if (score > bestScore) {
                         bestScore = score;
                         bestMove = {r, c};
@@ -181,5 +181,6 @@ function hasValidMove(color) {
 }
 
 initGame();
+
 
 
