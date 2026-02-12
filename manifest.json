@@ -6,9 +6,9 @@
   "background_color": "#2c3e50",
   "theme_color": "#2c3e50",
   "scope": ".",
-  "icons": [
+ "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/566/566260.png",
+      "src": "オセロ画像.jpg",
       "sizes": "512x512",
       "type": "image/png"
     }
