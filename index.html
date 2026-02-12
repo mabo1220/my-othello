@@ -4,32 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>たのしいオセロAI</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="たのしいオセロ">
+    
     <link rel="stylesheet" href="style.css">
-　　<link rel="manifest" href="manifest.json">
-   </head>
+    <link rel="manifest" href="manifest.json">
+</head>
 <body>
     <div class="container">
         <h1>たのしいオセロAI</h1>
 
-　　<div id="turn-display" class="turn-indicator">あなたの番です (黒)</div>
-    <div class="score-board">
-        <div>あなた(黒): <span id="p-score">2</span> 枚</div>
-        <div>PC(白): <span id="c-score">2</span> 枚</div>
-    </div>
-    
+        <div id="turn-display" class="turn-indicator">あなたの番です (黒)</div>
+
         <div class="score-board">
             <div>あなた(黒): <span id="p-score">2</span> 枚</div>
             <div>PC(白): <span id="c-score">2</span> 枚</div>
         </div>
+        
         <div id="board" class="board"></div>
+        
         <button onclick="initGame()" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">リセット</button>
     </div>
     
     <script src="script.js"></script>
 </body>
 </html>
-
-
-
-
-
