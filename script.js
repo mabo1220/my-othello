@@ -15,10 +15,20 @@ const weights = [
     [120, -20, 20,  5,  5, 20, -20, 120]
 ];
 
+// メッセージを更新する関数
+function updateMessage(text, isCpu = false) {
+    const turnEl = document.getElementById('turn-display');
+    if (!turnEl) return;
+    turnEl.innerText = text;
+    // CPUの時は赤っぽく、プレイヤーの時は緑っぽくクラスを付け替える
+    turnEl.className = isCpu ? "turn-indicator cpu-turn" : "turn-indicator player-turn";
+}
+
 function initGame() {
     board = Array.from({ length: SIZE }, () => Array(SIZE).fill(EMPTY));
     board[3][3] = CPU; board[4][4] = CPU;
     board[3][4] = PLAYER; board[4][3] = PLAYER;
+    updateMessage("あなたの番です (黒)");
     drawBoard();
 }
 
@@ -74,9 +84,13 @@ async function playerMove(r, c) {
     drawBoard();
 
     if (hasValidMove(CPU)) {
-        setTimeout(cpuMove, 500);
-    } else if (!hasValidMove(PLAYER)) {
-        alert("ゲーム終了！");
+        updateMessage("PCが考えています... (白)", true);
+        setTimeout(cpuMove, 600);
+    } else if (hasValidMove(PLAYER)) {
+        updateMessage("PCはパスしました。あなたの番です (黒)");
+    } else {
+        updateMessage("ゲーム終了！");
+        setTimeout(() => alert("ゲーム終了！"), 100);
     }
 }
 
@@ -91,7 +105,6 @@ function cpuMove() {
                     let nextBoard = board.map(row => [...row]);
                     nextBoard[r][c] = CPU;
                     flips.forEach(([fr, fc]) => nextBoard[fr][fc] = CPU);
-                    // 快適に遊ぶため深さを 4 に設定
                     let score = alphaBeta(nextBoard, 4, -Infinity, Infinity, false);
                     if (score > bestScore) {
                         bestScore = score;
@@ -106,9 +119,16 @@ function cpuMove() {
         board[bestMove.r][bestMove.c] = CPU;
         flips.forEach(([fr, fc]) => board[fr][fc] = CPU);
         drawBoard();
-        if (!hasValidMove(PLAYER) && hasValidMove(CPU)) setTimeout(cpuMove, 500);
+    }
+
+    if (hasValidMove(PLAYER)) {
+        updateMessage("あなたの番です (黒)");
+    } else if (hasValidMove(CPU)) {
+        updateMessage("あなたはパスです。PCの番が続きます (白)", true);
+        setTimeout(cpuMove, 1000);
     } else {
-        alert("PCはパスします");
+        updateMessage("ゲーム終了！");
+        setTimeout(() => alert("ゲーム終了！"), 100);
     }
 }
 
@@ -163,16 +183,6 @@ function evaluate(vBoard) {
     return score;
 }
 
-function countPossibleMovesVirtual(vBoard, color) {
-    let count = 0;
-    for (let r = 0; r < SIZE; r++) {
-        for (let c = 0; c < SIZE; c++) {
-            if (vBoard[r][c] === EMPTY && getFlipList(r, c, color, vBoard).length > 0) count++;
-        }
-    }
-    return count;
-}
-
 function hasValidMove(color) {
     for (let r = 0; r < SIZE; r++)
         for (let c = 0; c < SIZE; c++)
@@ -180,7 +190,5 @@ function hasValidMove(color) {
     return false;
 }
 
+// 起動
 initGame();
-
-
-
